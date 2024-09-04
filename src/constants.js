@@ -1,1 +1,1 @@
-ÿþ
+export const DB_Name='JS-Backend'
