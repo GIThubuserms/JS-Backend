@@ -1,5 +1,6 @@
 import dotenv from"dotenv";
 import databaseConnectionn from"./db/connection.js";
+import app from "./app.js";
 
 dotenv.config({ path: "./.env" });
 
@@ -25,4 +26,11 @@ dotenv.config({ path: "./.env" });
 //     }
 //     })()
 
+// when async return something it will give a promise 
 databaseConnectionn()
+.then(()=>{
+    app.listen(process.env.PORT || 4000,()=>{
+        console.log(`App listening on ${process.env.PORT}`);
+    })
+})
+.catch((error)=>console.log("DB Connection Failed : -",error ))
