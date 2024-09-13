@@ -52,6 +52,9 @@ const UserSchema=new Schema(
     ]
 },{timestamps:true})
 
+
+
+
 // pre is pre defined hook use for a middlewere and check as pre function for some work and here we are hashing password so it can stored in database in hash password form 
 
 UserSchema.pre('save',async function(next)
@@ -92,11 +95,13 @@ UserSchema.methods.RefreshToken=function()
         Fullname:this.Fullname,
         username:this.username,
         email:this.email
-    },
+    },    
     process.env.REFRESH_TOKEN_SECRET,
     {
         expiresIn:process.env.REFRESH_TOKEN_EXPIRY
     }
 )
 }
+
+
 export const User=mongoose.model('User',UserSchema)
