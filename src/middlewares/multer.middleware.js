@@ -1,6 +1,5 @@
 import multer from'multer'
 
-
 export const upload=multer({storage})
 
 const storage=multer.diskStorage({

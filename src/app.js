@@ -14,5 +14,14 @@ app.use(urlencoded({extended:true,limit:'16kb'}))
 app.use(cookieParser())
 
 
+// Import all routes 
+import { Userroute } from './routes/user.routes.js';
+
+
+app.use('/api/v1/users',Userroute)
+
+// http://localhost:4000/api/v1/users/register
+// http://localhost:4000/api/v1/users/login
+
 export default app;
 
