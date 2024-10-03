@@ -19,14 +19,14 @@ const UserSchema=new Schema(
         required:true,
         lowercase:true,
         unique:true,
-        trim:true,
+        trim:true
     },
     Fullname:{
         type:String,
         required:true,
         lowercase:true,
         index:true,
-        trim:true,
+        trim:true
     },
     password:{
         type:String,       // encrypt policy           
@@ -38,11 +38,9 @@ const UserSchema=new Schema(
     },
     coverimage:{
         type:String,     // Cloudnairy
-        required:true,
     },
     refreshToken:{
         type:String,
-        required:true,
     },
     Watchhistory:[
         {
@@ -54,21 +52,23 @@ const UserSchema=new Schema(
 
 
 
+// hooks and methodss
+// userschema give us pre and methods methods for function and pre for middleware 
 
 // pre is pre defined hook use for a middlewere and check as pre function for some work and here we are hashing password so it can stored in database in hash password form 
 
 UserSchema.pre('save',async function(next)
 {
-    if(!this.password.ismodified("password")) return next() ;
-    this.password = bcrypt.hash(this.password,10)
+    if(!this.isModified('password')) return next() ;
+    this.password = await bcrypt.hash(this.password,10)
     next()
 })
 
 // self functionn 
 //  IsPasswordCorrect('12344')
 
-UserSchema.methods.IsPasswordCorrect=async function (password) {
-    return await bcrypt.compare(password,this.password)  // first argument is our password or user second is the orignal database stored password
+UserSchema.methods.IsPasswordCorrect=async function (passwod) {
+    return await bcrypt.compare(passwod,this.password)  // first argument is our password or user second is the orignal database stored password
 }
 
 

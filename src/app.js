@@ -15,13 +15,26 @@ app.use(cookieParser())
 
 
 // Import all routes 
-import { Userroute } from './routes/user.routes.js';
 
+import {userrouter} from './routes/user.routes.js'
 
-app.use('/api/v1/users',Userroute)
+app.use('/api/v1/users',userrouter)
+
 
 // http://localhost:4000/api/v1/users/register
 // http://localhost:4000/api/v1/users/login
 
 export default app;
+
+// app.get('register',(re,res)=>{
+//  res.status(200).json({
+//     message:'Ok'
+// })
+// })
+
+// Now when we use route we divide it 3 task 
+// we define post fn
+// we define secondary route
+// we define main route
+
 
