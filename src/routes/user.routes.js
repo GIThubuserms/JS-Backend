@@ -1,5 +1,5 @@
 import {Router} from "express"
-import { RegisterUser } from "../controllers/user.controller.js"
+import { RegisterUser,LoginUser } from "../controllers/user.controller.js"
 import { upload } from "../middlewares/multer.middleware.js"
 
 
@@ -18,10 +18,9 @@ userrouter.route('/register').post(
     ]),RegisterUser)
 
 
-
-
-
 // this upload logic acts as an middleware bcz we want to upload the files to our public folder here the upload
 // fields will upload the avatar image and cover image  to our folder from cloudinry we make the upload fn and cloudinary 
 // response is added to db :)
 
+
+userrouter.route('/login').post(LoginUser)

@@ -1,9 +1,34 @@
 import { asyncHandler } from "../utils/Asynchandler.js";
-import { upload } from "../middlewares/multer.middleware.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { Cloudnairy_Uplaod } from "../utils/Fileupload.js";
 import ApiResponse from "../utils/Apiresponse.js";
+
+
+ const generateAccessANDRefreshToken = async (userId) => {
+  try {
+   const user=await User.findById(userId);
+   const AccessToken=user.AccessToken()
+   const RefreshToken=user.RefreshToken()
+  console.log("user Before Refresh Token",user);
+  
+  // when we take the refresh and acces token we want to save in the user obj present in db
+  // so first update existing one 
+  // then save the existing one 
+
+  user.RefreshToken=RefreshToken
+  user.save([validateBeforeSave=false])
+
+
+   console.log("ACCEES  TOKEN: ",AccessToken);
+   console.log("REFRESH TOKEN: ",RefreshToken);
+  
+   return {AccessToken,RefreshToken} 
+  
+  } catch (error) {
+    throw new ApiError(500, "Token Not genareated !!");
+  }
+};
 
 export const RegisterUser = asyncHandler(async (req, res) => {
   // First take data from user from FORM,IMAGES,URL etc
@@ -49,8 +74,10 @@ export const RegisterUser = asyncHandler(async (req, res) => {
 
   let coverimage;
   const avatar = await Cloudnairy_Uplaod(avatarlocalpath);
-  coverimagelocalpath && {coverimage:await Cloudnairy_Uplaod(coverimagelocalpath)};
-  
+  coverimagelocalpath && {
+    coverimage: await Cloudnairy_Uplaod(coverimagelocalpath),
+  };
+
   if (!avatar) throw new ApiError(400, "Avatar Not upload on cloudinary");
 
   const newUser = await User.create({
@@ -71,4 +98,53 @@ export const RegisterUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, userverify, "User registred succesfully"));
+});
+
+export const LoginUser = asyncHandler(async (req, res) => {
+  /*
+   take email and password 
+   check it is not empty 
+   search user by email or password
+   user searched then access and refersh tokken
+   cokkie create 
+   send cokkie and json response
+ */
+
+  const { email, password, username } = req.body;
+
+  if (!email || !username)
+    throw new ApiError(400, "Email and Username is required !!");
+
+  const user = await User.findOne({
+    $or: [{ email }, { username }],
+  });
+
+  if (!user) throw new ApiError(400, "User Does not Exits !!");
+
+  const isUserPasswordCorrect = user.IsPasswordCorrect(password);
+
+  if (!isUserPasswordCorrect)
+    throw new ApiError(402, "Password Is Not Correct !!");
+
+   // for returning to user only access as bearer
+  const {AccessToken,RefreshToken}=await generateAccessANDRefreshToken(user._id)
+
+  // for cokkie 
+  const options={
+  httpOnly:true,
+  secure:true
+  }
+// cookie are stored in ( "key" : value)   cookie("Name",murtaza,options)
+
+  res
+  .status(200)
+  .cookie("accessToken",AccessToken,options)
+  .cookie("refreshToken",RefreshToken,options)
+  .json(
+    new ApiResponse(200,{user:},"User login Successfully")
+  )
+
+
+  
+
 });
