@@ -169,9 +169,26 @@ export const LoginUser = asyncHandler(async (req, res) => {
 
 });
 
-export const Logout=asyncHandler(async(res,req)=>{
-  // 
+export const Logout=asyncHandler(async(req,res)=>{
+  // for logout simple take req.user bcz we already add it and then update db by refresh token=""
   
+  const user=req.user
+  console.log('User getting from request  reg.user :'+user);
+  
+  await User.findByIdAndUpdate(user._id,{
+    $set:{refreshToken:undefined}},{new:true})
 
+    options={
+      httpOnly:true,
+      secure:true
+    }
+    
+     return res
+    .status(200)
+    .clearCookie("accessToken")
+    .clearCookie("refreshToken")
+    .json(
+      new ApiResponse(200,{},"User logged out Succesfully !!")
+    )
 
-})
+  })

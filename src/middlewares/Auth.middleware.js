@@ -26,4 +26,5 @@ export const verifyuser=asyncHandler(async(req,_,next)=>{
       next()
   } catch (error) {
  throw new ApiError(404,"Invalid Access Token")
+}
 })

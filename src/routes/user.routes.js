@@ -20,7 +20,7 @@ userrouter.route('/register').post(
             name:'coverimage',
             maxCount:1
     }
-    ]),RegisterUser)
+]),RegisterUser)
 userrouter.route('/login').post(LoginUser)
 // secured routes
 userrouter.route('/logout').post(verifyuser,Logout)
