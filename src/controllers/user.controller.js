@@ -6,23 +6,27 @@ import ApiResponse from "../utils/Apiresponse.js";
 
 
  const generateAccessANDRefreshToken = async (userId) => {
+  // This method do only 3 things 
+// -> Find User by id  which already exists
+// -> Generate Access AND Refersh Token
+// -> update Refreshtoken and save user new obj bcz you add refresh token  
+
   try {
    const user=await User.findById(userId);
+
    const AccessToken=user.AccessToken()
    const RefreshToken=user.RefreshToken()
+
   console.log("user Before Refresh Token",user);
-  
+  console.log("ACCEES  TOKEN: ",AccessToken);
+  console.log("REFRESH TOKEN: ",RefreshToken);  
   // when we take the refresh and acces token we want to save in the user obj present in db
   // so first update existing one 
   // then save the existing one 
-
-  user.RefreshToken=RefreshToken
-  user.save([validateBeforeSave=false])
-
-
-   console.log("ACCEES  TOKEN: ",AccessToken);
-   console.log("REFRESH TOKEN: ",RefreshToken);
+  user.refreshToken=RefreshToken
   
+  user.save({ validateBeforeSave: false });
+
    return {AccessToken,RefreshToken} 
   
   } catch (error) {
@@ -63,8 +67,10 @@ export const RegisterUser = asyncHandler(async (req, res) => {
 
   // Now for file  checking the req.body doesnot give us
   // when user uploads  middleware -> req.body -> req.files -> we extract
+  console.log(req.files);
+  
   const avatarlocalpath = req.files?.avatar?.[0]?.path;
-  const coverimagelocalpath = req.files?.coverimage?.[0]?.path;
+  const coverimagelocalpath = req.files?.coverimage?.[0]?.path
   console.log(avatarlocalpath);
   console.log(coverimagelocalpath);
 
@@ -72,11 +78,8 @@ export const RegisterUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Avatary File required");
   }
 
-  let coverimage;
-  const avatar = await Cloudnairy_Uplaod(avatarlocalpath);
-  coverimagelocalpath && {
-    coverimage: await Cloudnairy_Uplaod(coverimagelocalpath),
-  };
+  const avatar=await Cloudnairy_Uplaod(avatarlocalpath);
+  const coverimage=coverimagelocalpath && await Cloudnairy_Uplaod(coverimagelocalpath)
 
   if (!avatar) throw new ApiError(400, "Avatar Not upload on cloudinary");
 
@@ -85,10 +88,11 @@ export const RegisterUser = asyncHandler(async (req, res) => {
     email,
     Fullname,
     password,
-    avatar,
-    coverimage: coverimage || null,
+    avatar:avatar,
+    coverimage: coverimage?.url || "",
   });
-
+    
+  if(!newUser) throw new ApiError(500,"User Not Formed")
   // ask from database the is user created
   const userverify = await User.findById(newUser._id).select(
     "-password -refreshToken"
@@ -110,15 +114,20 @@ export const LoginUser = asyncHandler(async (req, res) => {
    send cokkie and json response
  */
 
-  const { email, password, username } = req.body;
+  const {email, password, username } = req.body;
+  
+  
 
-  if (!email || !username)
-    throw new ApiError(400, "Email and Username is required !!");
+   if(!(email||password)){
+    throw new ApiError(404,"Email and Password Required !!!")
+   }
+
 
   const user = await User.findOne({
     $or: [{ email }, { username }],
   });
-
+   //console.log("User Comming From DB : ",user);
+   
   if (!user) throw new ApiError(400, "User Does not Exits !!");
 
   const isUserPasswordCorrect = user.IsPasswordCorrect(password);
@@ -128,6 +137,11 @@ export const LoginUser = asyncHandler(async (req, res) => {
 
    // for returning to user only access as bearer
   const {AccessToken,RefreshToken}=await generateAccessANDRefreshToken(user._id)
+
+  const LoggedInUser=await User.findById(user._id).select('-password -refreshToken')
+
+  if(!LoggedInUser) throw new ApiError(500,"User Not logged In Successfully !!")
+   
 
   // for cokkie 
   const options={
@@ -141,10 +155,23 @@ export const LoginUser = asyncHandler(async (req, res) => {
   .cookie("accessToken",AccessToken,options)
   .cookie("refreshToken",RefreshToken,options)
   .json(
-    new ApiResponse(200,{user:},"User login Successfully")
+    new ApiResponse(
+      200,
+      {
+        user:LoggedInUser,RefreshToken,AccessToken
+      },
+      "User login Successfully"
+    )
   )
 
 
   
 
 });
+
+export const Logout=asyncHandler(async(res,req)=>{
+  // 
+  
+
+
+})
