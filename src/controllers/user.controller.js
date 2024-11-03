@@ -3,10 +3,12 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { Cloudnairy_Uplaod } from "../utils/Fileupload.js";
 import ApiResponse from "../utils/Apiresponse.js";
+import jwt from 'jsonwebtoken'
+
 
 
  const generateAccessANDRefreshToken = async (userId) => {
-  // This method do only 3 things 
+// This method do only 3 things 
 // -> Find User by id  which already exists
 // -> Generate Access AND Refersh Token
 // -> update Refreshtoken and save user new obj bcz you add refresh token  
@@ -17,12 +19,14 @@ import ApiResponse from "../utils/Apiresponse.js";
    const AccessToken=user.AccessToken()
    const RefreshToken=user.RefreshToken()
 
-  console.log("user Before Refresh Token",user);
-  console.log("ACCEES  TOKEN: ",AccessToken);
-  console.log("REFRESH TOKEN: ",RefreshToken);  
+  // console.log("user Before Refresh Token",user);
+  // console.log("ACCEES  TOKEN: ",AccessToken);
+  // console.log("REFRESH TOKEN: ",RefreshToken);  
   // when we take the refresh and acces token we want to save in the user obj present in db
   // so first update existing one 
   // then save the existing one 
+
+  // very imp point we only store refresh in db not access 
   user.refreshToken=RefreshToken
   
   user.save({ validateBeforeSave: false });
@@ -162,33 +166,69 @@ export const LoginUser = asyncHandler(async (req, res) => {
       },
       "User login Successfully"
     )
-  )
-
-
-  
-
+  )  
 });
 
 export const Logout=asyncHandler(async(req,res)=>{
   // for logout simple take req.user bcz we already add it and then update db by refresh token=""
   
   const user=req.user
-  console.log('User getting from request  reg.user :'+user);
+  // console.log('User getting from request  reg.user :'+user);
   
   await User.findByIdAndUpdate(user._id,{
     $set:{refreshToken:undefined}},{new:true})
 
-    options={
+    const options={
       httpOnly:true,
       secure:true
     }
     
      return res
     .status(200)
-    .clearCookie("accessToken")
-    .clearCookie("refreshToken")
+    .clearCookie("accessToken",AccessToken,options)
+    .clearCookie("refreshToken",RefreshToken,options)
     .json(
       new ApiResponse(200,{},"User logged out Succesfully !!")
     )
 
   })
+
+export const NewRefreshToken=asyncHandler(async(req,res)=>{
+  // take token (refreshtoken) from cokkies 
+  // verify token
+  // user=await findbyid(token._id)
+  // generateccessandrefeshtoken(user._id)
+  // cookkie set (new tokens)
+ try {
+   const CookieIncommingToken=req.cookies?.refreshToken||req.body.refreshToken||req.header("Authentication").replace('Bearer'," ")
+   console.log("Cookie Incomming Token"+CookieIncommingToken);
+   console.log("ENV Incomming Token"+process.env.REFRESH_TOKEN_SECRET);
+   if(!CookieIncommingToken) throw new ApiError(402,"UnAuthorized User")
+ 
+   const verifytoken=jwt.verify(CookieIncommingToken,process.env.REFRESH_TOKEN_SECRET)
+   console.log("Verify Token :-"+verifytoken);
+   if(!verifytoken) throw new ApiError(401,"UnAuthorized Token")
+ 
+   const DbIncomingUser=await User.findById(verifytoken._id)
+   console.log("DB INCOMING USER :- "+DbIncomingUser);
+   if(!DbIncomingUser) throw new ApiError(404,"REFRESH TOKEN NOT AUTHORIZED")
+ 
+   const {RefreshToken,AccessToken}=await generateAccessANDRefreshToken(DbIncomingUser._id)
+   
+   const options={
+     httpOnly:true,
+     secure:true,
+   }
+ 
+   return res
+   .status(200)
+   .cookie("AccessToken",AccessToken,options)
+   .cookie("AccessToken",RefreshToken,options)
+   .json(
+     new ApiResponse(200,{AccessToken,RefreshToken},"New Refresh Token Generated Succesfully !!")
+   )  
+ 
+ } catch (error) {
+   throw new ApiError(401,error?.message||"Invalid Refresh Token")
+ }
+})

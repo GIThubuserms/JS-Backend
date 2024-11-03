@@ -12,15 +12,16 @@ export const verifyuser=asyncHandler(async(req,_,next)=>{
       // we are getting token from cokies which we add while login the user req.cookie
       const token=req.cookies?.accessToken || req.header('Authentication')?.replace("Bearer ","") 
       if(!token) throw new ApiError(401,"UnAuthorized User !!")
-      console.log("TOKEN : "+token);
+      // console.log("TOKEN : "+token);
       
       const decodedtoken=jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
       if(!decodedtoken) throw new ApiError(402,"User is Not Authorized !!")
-      console.log("DECODED TOKEN : "+decodedtoken);
+     // console.log("DECODED TOKEN : "+decodedtoken._id);
+     
   
       const verifiedUser=await User.findById(decodedtoken?._id).select('-password -refreshToken')
       if(!verifiedUser) throw new ApiError(404,"User Not found !!")
-      console.log(verifiedUser);
+      // console.log("Verified user"+verifiedUser);
   
       req.user=verifiedUser
       next()
