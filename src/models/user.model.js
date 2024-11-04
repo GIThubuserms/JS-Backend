@@ -3,7 +3,6 @@ import mongoose, {Schema} from 'mongoose'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
-
 const UserSchema=new Schema(
     {
     username:{
@@ -67,8 +66,10 @@ UserSchema.pre('save',async function(next)
 // self functionn 
 //  IsPasswordCorrect('12344')
 
-UserSchema.methods.IsPasswordCorrect=async function (passwod) {
-    return await bcrypt.compare(passwod,this.password)  // first argument is our password or user second is the orignal database stored password
+UserSchema.methods.IsPasswordCorrect=async function (password) {
+    if (!password || !this.password) throw new Error("Password is Required")
+
+    return await bcrypt.compare(password,this.password)  // first argument is our password or user second is the orignal database stored password
 }
 
 

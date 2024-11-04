@@ -6,8 +6,7 @@ import ApiResponse from "../utils/Apiresponse.js";
 import jwt from 'jsonwebtoken'
 
 
-
- const generateAccessANDRefreshToken = async (userId) => {
+const generateAccessANDRefreshToken = async (userId) => {
 // This method do only 3 things 
 // -> Find User by id  which already exists
 // -> Generate Access AND Refersh Token
@@ -201,20 +200,22 @@ export const NewRefreshToken=asyncHandler(async(req,res)=>{
   // cookkie set (new tokens)
  try {
    const CookieIncommingToken=req.cookies?.refreshToken||req.body.refreshToken||req.header("Authentication").replace('Bearer'," ")
-   console.log("Cookie Incomming Token"+CookieIncommingToken);
-   console.log("ENV Incomming Token"+process.env.REFRESH_TOKEN_SECRET);
+
+  //  console.log("Cookie Incomming Token"+CookieIncommingToken);
+  //  console.log("ENV Incomming Token"+process.env.REFRESH_TOKEN_SECRET);
+  
    if(!CookieIncommingToken) throw new ApiError(402,"UnAuthorized User")
  
    const verifytoken=jwt.verify(CookieIncommingToken,process.env.REFRESH_TOKEN_SECRET)
    console.log("Verify Token :-"+verifytoken);
+
    if(!verifytoken) throw new ApiError(401,"UnAuthorized Token")
  
-   const DbIncomingUser=await User.findById(verifytoken._id)
+   const DbIncomingUser=await User.findById(verifytoken._id).select('-password -refreshToken')
    console.log("DB INCOMING USER :- "+DbIncomingUser);
    if(!DbIncomingUser) throw new ApiError(404,"REFRESH TOKEN NOT AUTHORIZED")
- 
-   const {RefreshToken,AccessToken}=await generateAccessANDRefreshToken(DbIncomingUser._id)
-   
+     
+   const {RefreshToken,AccessToken}=await generateAccessANDRefreshToken(DbIncomingUser._id)  
    const options={
      httpOnly:true,
      secure:true,
@@ -231,4 +232,30 @@ export const NewRefreshToken=asyncHandler(async(req,res)=>{
  } catch (error) {
    throw new ApiError(401,error?.message||"Invalid Refresh Token")
  }
+})
+
+export const UpdatePassword=asyncHandler(async(req,res)=>{
+  // Take {Oldpassword,newpassword} from req.body
+  // dbuser=req.user._id  db call
+  // dbuser.ispasswordcorrect(oldpass)
+  // dbuser.password=password
+  // dbuser.save
+
+  const {Oldpassword,Newpassword}=req.body
+  const dbuser=await User.findById(req.user._id)
+  if(!dbuser) throw new ApiError(401,"User Not Found !!");
+ 
+  if(!Oldpassword || !Newpassword ) throw new ApiError(400,"Password Fields are Required !!")
+
+  const VerifiedPassword=await dbuser.IsPasswordCorrect(Oldpassword)
+  if(!VerifiedPassword) throw new ApiError(402,"Invalid Password !!");
+  console.log("Verified Password  "+VerifiedPassword);
+
+  dbuser.password=Newpassword
+  dbuser.save({validateBeforeSave:false})
+  
+  return res
+  .status(200)
+  .json( new ApiResponse(200,{},"Password Changed SuccessFully"))
+
 })
