@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { Cloudnairy_Uplaod } from "../utils/Fileupload.js";
 import ApiResponse from "../utils/Apiresponse.js";
 import jwt from 'jsonwebtoken'
+import { set } from "mongoose";
 
 
 const generateAccessANDRefreshToken = async (userId) => {
@@ -259,3 +260,67 @@ export const UpdatePassword=asyncHandler(async(req,res)=>{
   .json( new ApiResponse(200,{},"Password Changed SuccessFully"))
 
 })
+
+export const GetCurrentUser=asyncHandler(async(req,res)=>{
+const user=req.user
+
+return res
+.status(200)
+.json(
+  new ApiResponse(200,user,"User Info Loading ")
+)
+
+})
+
+export const UpdateAccountDetails=asyncHandler(async(req,res)=>{
+  const {Fullname,email}=req.body
+  if(!email || !Fullname) throw new ApiError(402,"Invalid Crenditials !!")
+  
+  const currentuser=req.user 
+  await currentuser.findByIdAndUpdate(currentuser._id,
+    {
+       $set:
+        {
+         Fullname:Fullname
+        }
+    },
+    {
+      new:true
+    }
+  ).select('-password -refreshToken')
+  
+  return res
+  .status(200)
+  .json(
+    new ApiResponse(200,{"Fullname: ":Fullname},"Fullname Changed Succesfully")
+  )
+})
+
+export const UpdateAvatar=asyncHandler(async(req,res)=>{
+  const avatarURL=req.file?.path
+  const CloudinaryURL= await Cloudnairy_Uplaod(avatarURL)
+ 
+  const currentuser=req.user 
+  const DbuserUpdated=await currentuser.findByIdAndUpdate(currentuser._id,
+    {
+      $set:{
+             avatar:CloudinaryURL
+        }
+    },
+    {
+      new:true
+    }
+  ).select('-password -refreshToken')
+
+  return res
+  .status(200)
+  .json(
+    new ApiResponse(200,{DbuserUpdated},"Avatar Updated Successfully")
+  )
+
+})
+
+export const UpdateCoverImage=asyncHandler(async(req,res)=>{
+
+})
+

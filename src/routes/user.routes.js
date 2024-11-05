@@ -1,5 +1,6 @@
 import {Router} from "express"
-import { RegisterUser,LoginUser, Logout ,NewRefreshToken,UpdatePassword} from "../controllers/user.controller.js"
+import { RegisterUser,LoginUser, Logout ,NewRefreshToken,UpdatePassword,
+        GetCurrentUser,UpdateAccountDetails,UpdateAvatar} from "../controllers/user.controller.js"
 import { upload } from "../middlewares/multer.middleware.js"
 import { verifyuser } from "../middlewares/Auth.middleware.js"
 
@@ -22,7 +23,12 @@ userrouter.route('/register').post(
     }
 ]),RegisterUser)
 userrouter.route('/login').post(LoginUser)
+
 // secured routes
 userrouter.route('/logout').post(verifyuser,Logout)
 userrouter.route('/refreshToken').post(NewRefreshToken)
 userrouter.route('/changepassword').post(verifyuser,UpdatePassword)
+userrouter.route('/getcurrentuser').post(verifyuser,GetCurrentUser)
+userrouter.route('/changeaccountdetails').post(verifyuser,UpdateAccountDetails)
+userrouter.route('/changeavatar').post(verifyuser,upload.fields([{name:'avatar'},{maxCount:1}]),UpdateAvatar)
+

@@ -1,8 +1,5 @@
 import multer from'multer'
 
-
-// multer.diskstorage 2obj both are function  1 destination 2 filename
-
 const storage=multer.diskStorage({
    destination:function(req,file,cb){
     return cb(null,'./public/temp')
@@ -14,6 +11,17 @@ const storage=multer.diskStorage({
 export const upload = multer({ 
   storage
 })
+
+
+
+
+//   fileFilter:function(req, file, cb){
+//   if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+//     cb(null, true); // Accept file
+//   } else {
+//     cb(new Error('Invalid file type!'), false); // Reject file
+//   }
+// }
 
 
 
