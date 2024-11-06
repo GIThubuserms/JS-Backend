@@ -277,7 +277,7 @@ export const UpdateAccountDetails=asyncHandler(async(req,res)=>{
   if(!email || !Fullname) throw new ApiError(402,"Invalid Crenditials !!")
   
   const currentuser=req.user 
-  await currentuser.findByIdAndUpdate(currentuser._id,
+  await User.findByIdAndUpdate(currentuser._id,
     {
        $set:
         {
@@ -292,16 +292,20 @@ export const UpdateAccountDetails=asyncHandler(async(req,res)=>{
   return res
   .status(200)
   .json(
-    new ApiResponse(200,{"Fullname: ":Fullname},"Fullname Changed Succesfully")
+    new ApiResponse(200,{"Fullname: ":Fullname,"Email: ":email},"Fullname Changed Succesfully")
   )
 })
 
 export const UpdateAvatar=asyncHandler(async(req,res)=>{
   const avatarURL=req.file?.path
+  console.log("AvatarUrl  :"+avatarURL);
+
+
   const CloudinaryURL= await Cloudnairy_Uplaod(avatarURL)
+  if(!CloudinaryURL) throw new ApiError(400,"Avatar Not uploaded on Cloudinary!!")
  
   const currentuser=req.user 
-  const DbuserUpdated=await currentuser.findByIdAndUpdate(currentuser._id,
+  const DbuserUpdated=await User.findByIdAndUpdate(currentuser._id,
     {
       $set:{
              avatar:CloudinaryURL
@@ -312,6 +316,7 @@ export const UpdateAvatar=asyncHandler(async(req,res)=>{
     }
   ).select('-password -refreshToken')
 
+  if(!DbuserUpdated) throw new ApiError(400,"User Not Validated !!")
   return res
   .status(200)
   .json(
@@ -321,6 +326,34 @@ export const UpdateAvatar=asyncHandler(async(req,res)=>{
 })
 
 export const UpdateCoverImage=asyncHandler(async(req,res)=>{
+  console.log("REQ FILE" +req.file);
+  
+  const coverimageURL=req.file
+  console.log("CoverImageUrl :"+coverimageURL);
+  
+  const CloudinaryURL= await Cloudnairy_Uplaod(coverimageURL)
+  if(!CloudinaryURL) throw new ApiError(400,"CoverImage Not uploaded on Cloudinary!!")
+
+
+  const currentuser=req.user 
+  const DbuserUpdated=await User.findByIdAndUpdate(currentuser._id,
+    {
+      $set:{
+        coverimage:CloudinaryURL
+        }
+    },
+    {
+      new:true
+    }
+  ).select('-password -refreshToken')
+
+  if(!DbuserUpdated) throw new ApiError(400,"User Not Validated !!")
+
+  return res
+  .status(200)
+  .json(
+    new ApiResponse(200,{DbuserUpdated},"Coverimage Updated Successfully")
+  )
 
 })
 
