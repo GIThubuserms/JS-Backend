@@ -40,4 +40,5 @@ const VedioSchema = new Schema(
 
 // For the vedios pagiantion and filter 
 VedioSchema.plugin(mongooseAggregatePaginate)
+
 export const Vedio = mongoose.model("Vedio", VedioSchema);
