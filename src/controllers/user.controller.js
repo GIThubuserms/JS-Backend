@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import { Cloudnairy_Uplaod } from "../utils/Fileupload.js";
 import ApiResponse from "../utils/Apiresponse.js";
 import jwt from 'jsonwebtoken'
-import { set } from "mongoose";
+
 
 
 const generateAccessANDRefreshToken = async (userId) => {
@@ -355,5 +355,78 @@ export const UpdateCoverImage=asyncHandler(async(req,res)=>{
     new ApiResponse(200,{DbuserUpdated},"Coverimage Updated Successfully")
   )
 
+})
+
+export const GetCurrentUserProfile=asyncHandler(async(req,res)=>{
+  //const {username}=req.params
+  console.log("TESTING 123...");
+  
+  const {username,_id}=req.user
+  if(!username) throw new ApiError(402,"Username is required !!") 
+    
+   console.log("USERNAME: "+username);
+   console.log("_ID :"+_id);
+   
+
+  const profile=await User.aggregate([
+    {
+      $match:{
+        "username":username
+      }
+    },
+    {
+      $lookup:{
+        from:"subscriptions",
+        localField:"_id",
+        foreignField:"channel",
+        as:"subscribers"
+      }
+    },
+    {
+      $lookup:{
+        from:"subscriptions",
+        localField:"_id",
+        foreignField:"subscriber",
+        as:"subscribedTo"
+      }  
+    },
+    {
+      $addFields:{
+        Subscribers:{
+          $size:"$subscribers"
+        },
+        SubscribedTo:{
+          $size:"$subscribedTo"
+        },
+        IsSubscribed:{
+          $cond:{
+            if:{$in:[_id,"$subscribers.subscriber"]},
+            then:true,
+            else:false,
+          }
+        }
+        },
+    },
+    {
+      $project:{
+       Subscribers:1,
+       SubscribedTo:1,
+       IsSubscribed:1,
+       fullname:1,
+       username:1,
+       CoverImage:1,
+       avatar:1
+      }
+    }
+  ])  
+  
+  if(!profile) throw new ApiError(404,"Username doesnot matched with database !!")
+
+  console.log("PROFILE : "+profile);
+  return res
+  .status(200)
+  .json(
+    new ApiResponse(200,profile[0],"User Profile Fetched Succesfully")
+  )
 })
 
