@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { Cloudnairy_Uplaod } from "../utils/Fileupload.js";
 import ApiResponse from "../utils/Apiresponse.js";
 import jwt from 'jsonwebtoken'
+import mongoose, { mongo } from "mongoose";
 
 
 
@@ -357,21 +358,19 @@ export const UpdateCoverImage=asyncHandler(async(req,res)=>{
 
 })
 
-export const GetCurrentUserProfile=asyncHandler(async(req,res)=>{
-  //const {username}=req.params
-  console.log("TESTING 123...");
-  
-  const {username,_id}=req.user
-  if(!username) throw new ApiError(402,"Username is required !!") 
-    
-   console.log("USERNAME: "+username);
-   console.log("_ID :"+_id);
-   
+export const GetUserProfile=asyncHandler(async(req,res)=>{
 
-  const profile=await User.aggregate([
-    {
+  const {username}=req.params
+  console.log("username:  "+username)
+  
+
+  if(!username) throw new ApiError(402,"Username Is Required !!")
+  
+  const channel=await User.aggregate([
+    { 
       $match:{
-        "username":username
+        username:username
+        
       }
     },
     {
@@ -388,45 +387,99 @@ export const GetCurrentUserProfile=asyncHandler(async(req,res)=>{
         localField:"_id",
         foreignField:"subscriber",
         as:"subscribedTo"
-      }  
+      }
     },
     {
-      $addFields:{
-        Subscribers:{
-          $size:"$subscribers"
-        },
-        SubscribedTo:{
-          $size:"$subscribedTo"
-        },
-        IsSubscribed:{
-          $cond:{
-            if:{$in:[_id,"$subscribers.subscriber"]},
-            then:true,
-            else:false,
-          }
-        }
-        },
+     $addFields:{
+      Totalsubscriber:{
+        $size:"$subscribers"
+      },
+      SubscribedTo:{
+        $size:"$subscribedTo"
+      },
+      IsSubscribed:{
+        $cond:{
+        if:{$in:[req.user?._id,"$subscribers.subscriber"]},
+        then:true,
+        else:false
+      }
+    }
+    }
     },
     {
       $project:{
-       Subscribers:1,
-       SubscribedTo:1,
-       IsSubscribed:1,
-       fullname:1,
-       username:1,
-       CoverImage:1,
-       avatar:1
+      fullname:1,
+      username:1,
+      CoverImage:1,
+      avatar:1,
+      Totalsubscriber:1,
+      SubscribedTo:1,
+      IsSubscribed:1,
       }
     }
-  ])  
-  
-  if(!profile) throw new ApiError(404,"Username doesnot matched with database !!")
+  ])
 
-  console.log("PROFILE : "+profile);
-  return res
-  .status(200)
-  .json(
-    new ApiResponse(200,profile[0],"User Profile Fetched Succesfully")
-  )
+  console.log("PROFILE : "+channel[0]);
+  
+
+  if(!channel.length) throw new ApiError(404,"User doesnot matched with database !!")
+
+   
+    return res
+    .status(200)
+    .json(
+      new ApiResponse(200,channel[0],"User Profile Fetched Succesfully")
+    )
+})
+
+export const GetWatchistory=asyncHandler(async(req,res)=>{
+
+  // The ids are diffrent in mongo and  moongoose ( one stores string one store objectId type)
+  // we get string bcz moongose convert it by its own 
+  // Further Explanation:-
+
+ // In that we simply match watch history id and vedios id then match vedios(owner) id with user id 
+
+  const id=req.user._id
+  console.log("Id "+id);
+  console.log(typeof(id));
+  
+  const mongooseid=new mongoose.Types.ObjectId(id)
+  console.log("MoongooseId"+mongooseid);
+  console.log(typeof(mongooseid));
+  
+  const WatcHistory=User.aggregate([
+    {
+      $match:{
+        _id:mongooseid
+      }
+    },
+    {
+      $lookup:{
+        from:"",
+        localField:"",
+        foreignField:"",
+        as:"",
+        pipeline:[
+          {
+           $lookup:{
+            from:"",
+            localField:"",
+            foreignField:"",
+            as:"",
+            pipeline:[
+              {
+                $project:{
+                  fullname:1
+                }
+              }
+            ]
+          }
+          },
+      ]
+      }
+    }
+  ])
+
 })
 
