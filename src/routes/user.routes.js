@@ -1,6 +1,7 @@
 import {Router} from "express"
 import { RegisterUser,LoginUser, Logout ,NewRefreshToken,UpdatePassword,
-        GetCurrentUser,UpdateAccountDetails,UpdateAvatar,UpdateCoverImage,GetUserProfile} from "../controllers/user.controller.js"
+        GetCurrentUser,UpdateAccountDetails,UpdateAvatar,UpdateCoverImage,
+        GetUserProfile,GetWatchistory} from "../controllers/user.controller.js"
 import { upload } from "../middlewares/multer.middleware.js"
 import { verifyuser } from "../middlewares/Auth.middleware.js"
 
@@ -23,3 +24,4 @@ userrouter.route('/changeaccountdetails').post(verifyuser,UpdateAccountDetails)
 userrouter.route('/changeavatar').post(verifyuser,upload.single('avatar'),UpdateAvatar)
 userrouter.route('/changecoverimage').post(verifyuser,upload.single('coverimage'),UpdateCoverImage)
 userrouter.route('/getchannel/:username').post(verifyuser,GetUserProfile)
+userrouter.route('/getwatchistory').post(verifyuser,GetWatchistory)

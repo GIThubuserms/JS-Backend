@@ -441,45 +441,66 @@ export const GetWatchistory=asyncHandler(async(req,res)=>{
  // In that we simply match watch history id and vedios id then match vedios(owner) id with user id 
 
   const id=req.user._id
-  console.log("Id "+id);
-  console.log(typeof(id));
+  // console.log("Id   "+id);
+  // console.log(typeof(id));
   
-  const mongooseid=new mongoose.Types.ObjectId(id)
-  console.log("MoongooseId"+mongooseid);
-  console.log(typeof(mongooseid));
+  // const mongooseid=new mongoose.Types.ObjectId(id)
+  // console.log("MoongooseId    "+mongooseid);
+  // console.log(typeof(mongooseid));
   
-  const WatcHistory=User.aggregate([
+  const WatcHistory=await User.aggregate([
     {
       $match:{
-        _id:mongooseid
+        _id:new mongoose.Types.ObjectId(id)
       }
     },
     {
       $lookup:{
-        from:"",
-        localField:"",
-        foreignField:"",
-        as:"",
+        from:"vedios",
+        localField:"Watchhistory",
+        foreignField:"_id",
+        as:"Watchhistory",
         pipeline:[
           {
            $lookup:{
-            from:"",
-            localField:"",
-            foreignField:"",
-            as:"",
+            from:"users",
+            localField:"Owner",
+            foreignField:"_id",
+            as:"Owner",
             pipeline:[
               {
                 $project:{
-                  fullname:1
+                  Fullname:1,
+                  usernamne:1,
                 }
               }
             ]
           }
+          },{
+            $addFields:{
+              Owner:{
+                $first:"$Owner"
+              }
+            }
           },
       ]
       }
+    },
+    {
+      $project:{
+        Watchhistory:1,
+        Owner:1,
+        Fullname:1,
+      }
     }
   ])
+  // console.log("WatcHistory :"+WatcHistory[0]);
 
+  if(!WatcHistory.length) new ApiError(200,"WatcHistory Is Not Fetched")
+  return res
+  .status(200)
+  .json(
+    new ApiResponse(200,WatcHistory[0],"WatcHistory Fetched Successfully")
+  )
 })
 
