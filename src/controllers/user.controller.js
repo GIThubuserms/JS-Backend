@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import { Cloudnairy_Uplaod } from "../utils/Fileupload.js";
 import ApiResponse from "../utils/Apiresponse.js";
 import jwt from 'jsonwebtoken'
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 
 
@@ -192,7 +192,7 @@ export const Logout=asyncHandler(async(req,res)=>{
       new ApiResponse(200,{},"User logged out Succesfully !!")
     )
 
-  })
+})
 
 export const NewRefreshToken=asyncHandler(async(req,res)=>{
   // take token (refreshtoken) from cokkies 
