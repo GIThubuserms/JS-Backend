@@ -72,12 +72,12 @@ export const RegisterUser = asyncHandler(async (req, res) => {
 
   // Now for file  checking the req.body doesnot give us
   // when user uploads  middleware -> req.body -> req.files -> we extract
-  console.log(req.files);
+  // console.log(req.files);
   
   const avatarlocalpath = req.files?.avatar?.[0]?.path;
   const coverimagelocalpath = req.files?.coverimage?.[0]?.path
-  console.log(avatarlocalpath);
-  console.log(coverimagelocalpath);
+  // console.log(avatarlocalpath);
+  // console.log(coverimagelocalpath);
 
   if (!avatarlocalpath) {
     throw new ApiError(400, "Avatary File required");
@@ -85,6 +85,8 @@ export const RegisterUser = asyncHandler(async (req, res) => {
 
   const avatar=await Cloudnairy_Uplaod(avatarlocalpath);
   const coverimage=coverimagelocalpath && await Cloudnairy_Uplaod(coverimagelocalpath)
+  console.log("Coverimage : ",coverimage);
+  
 
   if (!avatar) throw new ApiError(400, "Avatar Not upload on cloudinary");
 
@@ -93,7 +95,7 @@ export const RegisterUser = asyncHandler(async (req, res) => {
     email,
     Fullname,
     password,
-    avatar:avatar,
+    avatar:avatar.url,
     coverimage: coverimage?.url || "",
   });
     
