@@ -311,7 +311,7 @@ export const UpdateAvatar=asyncHandler(async(req,res)=>{
   const DbuserUpdated=await User.findByIdAndUpdate(currentuser._id,
     {
       $set:{
-             avatar:CloudinaryURL
+             avatar:CloudinaryURL.url
         }
     },
     {
@@ -342,7 +342,7 @@ export const UpdateCoverImage=asyncHandler(async(req,res)=>{
   const DbuserUpdated=await User.findByIdAndUpdate(currentuser._id,
     {
       $set:{
-        coverimage:CloudinaryURL
+        coverimage:CloudinaryURL.url
         }
     },
     {
