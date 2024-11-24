@@ -102,4 +102,12 @@ export const GetVedioById=asyncHandler(async(req,res)=>{
 
 export const GetAllVedios=asyncHandler(async(req,res)=>{})
 
-export const TogglePublishStatus=asyncHandler(async(req,res)=>{})
+export const TogglePublishStatus=asyncHandler(async(req,res)=>{
+    const {vedioId}=req.params
+    const vedio=await Vedio.findById(vedioId)
+    if(!vedio) throw new ApiError(402,"Vedio Not Found!!")
+    const togglepublished=await Vedio.findByIdAndUpdate(vedioId,{$set:{isPublished:!vedio.isPublished}},{new:true}).select("isPublished")
+    if(!togglepublished) throw new ApiError(402,"Vedio Published Status Error !!")
+    
+    res.status(200).json( new ApiResponse(200,togglepublished,"Vedio Control Changed successfully"))    
+})
