@@ -80,10 +80,25 @@ res.status(200)
 })
 
 export const DeleteVedio=asyncHandler(async(req,res)=>{
+    const {vedioId}=req.params
+    console.log("VEDIO ID   : "+vedioId);
     
+   const deletedvedio= await Vedio.findByIdAndDelete(vedioId)
+   if(!deletedvedio) throw new ApiError(500,"Vedio Not Found")
+
+    res.status(200).json(new ApiResponse(200,{},"Vedio deleted successfully "))
 })
 
-export const GetVedioById=asyncHandler(async(req,res)=>{})
+export const GetVedioById=asyncHandler(async(req,res)=>{
+    const {vedioId}=req.params
+
+    const gettedvedio=await Vedio.findById(vedioId).select('-isPublished')
+    if(!gettedvedio) throw new ApiError(500,"There was a error while Fetching the vedio !!") 
+
+    res.status(200).json(new ApiResponse(200,gettedvedio,"Vedio Fetched successfully "))
+
+
+})
 
 export const GetAllVedios=asyncHandler(async(req,res)=>{})
 
