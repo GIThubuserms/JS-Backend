@@ -1,6 +1,6 @@
 import {Vedio} from '../models/vedio.model.js'
 import {Cloudnairy_Uplaod} from '../utils/Fileupload.js'
-import ApiError from '../utils/ApiError.js'
+import {ApiError} from '../utils/ApiError.js'
 import ApiResponse from '../utils/Apiresponse.js'
 import { asyncHandler } from '../utils/Asynchandler.js'
 
@@ -8,36 +8,41 @@ import { asyncHandler } from '../utils/Asynchandler.js'
 export const UploadVedio=asyncHandler(async(req,res)=>{
    // Take vedio and thumnbnail from files
    // Take tittle,discriptions from body
+    
+    const {Title,Discription}=req.body
+    if(!(Title&&Discription)) throw new ApiError(402,"Please Provide Vedio Tittle and Discription !!")
+    // console.log("TESTING TIITLE COMPLETE");
 
-    const {tittle,discription}=req.body
-    if(!(tittle&&discription)) throw new ApiError(402,"Please Provide Vedio Tittle and Discription !!")
-   
-    const vedio=req.files?.[0]?.vedio
-    const thumbnail=req.files?.[0]?.thumbnail
-    if(!(vedio,thumbnail)) throw new ApiError(402,"Please Provide Vedio  and Thumnail !!")
-    console.log("Vedio comming from req.files : "+vedio);
-
+    //  console.log(req.files);
+     
+    const vedio=req.files?.Vediofile?.[0]?.path
+    const thumbnail=req.files?.Thumbnail?.[0]?.path
+    if(!(vedio,thumbnail)) throw new ApiError(402,"Please Provide Vedio and Thumnail !!")
+    // console.log("Vedio comming from req.files : "+vedio);
+    // console.log("TESTING MULTER COMPLETE");
 
     const uploadedvedio=await Cloudnairy_Uplaod(vedio)
     const uploadedthumbnail=await Cloudnairy_Uplaod(thumbnail)
     if(!(uploadedthumbnail&&uploadedthumbnail)) throw new ApiError(400,"Vedio Not uploaded on Cloudinary !!")
     console.log("Vedio comming from Cloudinary : "+uploadedvedio);
 
-    
+    // console.log("TESTING CLOUINARY COMPLETE");
+
     const dbvedio=await Vedio.create({
         Vediofile:uploadedvedio.url,
         Thumbnail:uploadedthumbnail.url,
-        Title:tittle,
-        Discription:discription,
+        Title:Title,
+        Discription,
         Duration:uploadedvedio.duration,
-        Views:0,
-        isPublished
     })
-
-
     if(!dbvedio) throw new ApiError(502,"Something Went wrong while uploading vedio !!")
+
+
+    const dbincomingvedio=await Vedio.findById(dbvedio._id).select('-isPublished')
+    if(!dbincomingvedio) throw new ApiError(402,"Vedio Not found !!")
+
     return res.status(200).json(
-        new ApiResponse(200,{},"Vedio Uploaded Succesfully")
+        new ApiResponse(200,dbincomingvedio,"Vedio Uploaded Succesfully")
     )    
 })
 
