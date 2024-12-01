@@ -13,6 +13,7 @@ const VedioSchema = new Schema(
     Owner: {
         type:Schema.Types.ObjectId,
         ref:'User'
+
     },
     Title: {
       type: String,

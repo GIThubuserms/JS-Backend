@@ -10,5 +10,5 @@ Vediorouter.route('/uploadvedio').post(verifyuser,upload.fields([{name:"Vediofil
 Vediorouter.route('/editvedio/:vedioId').post(verifyuser,upload.single('Thumbnail'),EditVedio)
 Vediorouter.route('/deletevedio/:vedioId').post(verifyuser,DeleteVedio)
 Vediorouter.route('/getvediobyid/:vedioId').post(GetVedioById)
-Vediorouter.route('/getallvedio').post(GetAllVedios)
+Vediorouter.route('/getallvedio/:userId').post(GetAllVedios)
 Vediorouter.route('/togglepublishstatus/:vedioId').post(verifyuser,TogglePublishStatus)

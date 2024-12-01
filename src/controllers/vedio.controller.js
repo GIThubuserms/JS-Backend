@@ -3,12 +3,14 @@ import {Cloudnairy_Uplaod} from '../utils/Fileupload.js'
 import {ApiError} from '../utils/ApiError.js'
 import ApiResponse from '../utils/Apiresponse.js'
 import { asyncHandler } from '../utils/Asynchandler.js'
+import mongoose from 'mongoose'
 
 
 export const UploadVedio=asyncHandler(async(req,res)=>{
    // Take vedio and thumnbnail from files
    // Take tittle,discriptions from body
-    
+    const user=req.user
+     
     const {Title,Discription}=req.body
     if(!(Title&&Discription)) throw new ApiError(402,"Please Provide Vedio Tittle and Discription !!")
     // console.log("TESTING TIITLE COMPLETE");
@@ -29,11 +31,12 @@ export const UploadVedio=asyncHandler(async(req,res)=>{
     // console.log("TESTING CLOUINARY COMPLETE");
 
     const dbvedio=await Vedio.create({
-        Vediofile:uploadedvedio.url,
-        Thumbnail:uploadedthumbnail.url,
-        Title:Title,
+        Vediofile:uploadedvedio?.url,
+        Thumbnail:uploadedthumbnail?.url,
+        Title,
         Discription,
-        Duration:uploadedvedio.duration,
+        Owner:user?._id,
+        Duration:uploadedvedio?.duration,
     })
     if(!dbvedio) throw new ApiError(502,"Something Went wrong while uploading vedio !!")
 
@@ -100,7 +103,61 @@ export const GetVedioById=asyncHandler(async(req,res)=>{
 
 })
 
-export const GetAllVedios=asyncHandler(async(req,res)=>{})
+export const GetAllVedios=asyncHandler(async(req,res)=>{
+let {userId,page,limit,sortBy,sortType}=req.query
+  page=parseInt(page) || 1
+  limit=parseInt(limit) || 10
+  sortBy=sortBy || "createdAt"
+  sortType=sortType==="Desc"?-1:1
+    
+  const startindex=(page-1)*limit
+  console.log("Start Index  : "+startindex);
+  
+ const dbvedios=await Vedio.aggregate([
+   {
+     $match: {
+       Owner: new mongoose.Types.ObjectId(userId)
+     }
+   },
+   {
+     $lookup: {
+       from:"users",
+       localField:"Owner",
+       foreignField:"_id",
+       as:"Owner",
+       pipeline:[
+       {
+       $project: {
+       username:1,
+       Fullname:1,
+       avatar:1
+       },  
+       },
+       ]
+     }
+   },
+   {
+     $addFields:{Owner:{$arrayElemAt:["$Owner",0]}}},
+   {
+    // i want to sort created at by decsending order so [createdAt]: -1 
+     $sort:{[sortBy]: sortType }, 
+   },
+   {
+     $skip:startindex
+   },
+   {
+     $limit:limit
+   }
+ ])
+ if(!dbvedios.length) throw new ApiError(502,"User Vedios Not found")
+
+return res
+.status(200)
+.json(
+    new ApiResponse(200,dbvedios,"User Vedios Fectched Successfully !!")
+)
+
+})
 
 export const TogglePublishStatus=asyncHandler(async(req,res)=>{
     const {vedioId}=req.params
