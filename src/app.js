@@ -20,9 +20,12 @@ app.use(cookieParser())        // for cokkie data getting
 
 import {userrouter} from './routes/user.routes.js'
 import {Vediorouter} from './routes/vedio.route.js'
+import { Playlistrouter } from './routes/playlist.route.js';
+
 
 app.use('/api/v1/users',userrouter)
 app.use('/api/v1/vedios',Vediorouter)
+app.use('/api/v1/playlist',Playlistrouter)
 
 export default app;
 

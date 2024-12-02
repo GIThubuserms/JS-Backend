@@ -11,10 +11,12 @@ const PlaylistSchema=new mongoose.Schema({
         type:String,
         required:true
     },
-    vedios:{
+    vedios:[
+    {
         type:Schema.Types.ObjectId,
         ref:"Vedio"
-    },
+    }
+    ],
     owner:{
        type:Schema.Types.ObjectId,
        ref:"User"
