@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { verifyuser } from "../middlewares/Auth.middleware";
-import { AddVedioToPlaylist, createPlaylist, deletePlaylist, DeleteVedioFromPlaylist, getAllPlaylistById, getPlaylistById, updatePlaylist } from "../controllers/playlist.controller";
+import { verifyuser } from "../middlewares/Auth.middleware.js";
+import { AddVedioToPlaylist, createPlaylist, deletePlaylist, DeleteVedioFromPlaylist, getAllPlaylistById, getPlaylistById, updatePlaylist } from "../controllers/playlist.controller.js";
 
 
 export const Playlistrouter=Router()
@@ -9,13 +9,12 @@ Playlistrouter.use(verifyuser)
 
 Playlistrouter.route('/createPlaylist').post(createPlaylist)
 
-Playlistrouter.route('/:id')
-.delete(deletePlaylist)
-.get(getPlaylistById)
-.patch(updatePlaylist)
+Playlistrouter.route('/deleteplaylist/:id').delete(deletePlaylist)
+Playlistrouter.route('/getplaylist/:id').get(getPlaylistById)
+Playlistrouter.route('/updateplaylist/:id').patch(updatePlaylist)
 
-Playlistrouter.router('/Add/:vedioId/:PlaylistId').patch(AddVedioToPlaylist)
+Playlistrouter.route('/Add/:vedioId/:PlaylistId').post(AddVedioToPlaylist)
 
-Playlistrouter.router('/Remove/:vedioId/:PlaylistId').patch(DeleteVedioFromPlaylist)
+Playlistrouter.route('/Remove/:vedioId/:PlaylistId').patch(DeleteVedioFromPlaylist)
 
-Playlistrouter.router('/users/:userId').get(getAllPlaylistById)
+Playlistrouter.route('/users/:userId').get(getAllPlaylistById)
