@@ -14,18 +14,17 @@ app.use(express.json({limit:'16kb'}))        // form data conversion (comming fr
 app.use(urlencoded({extended:true,limit:'16kb'}))   // url means req.params
 app.use(cookieParser())        // for cokkie data getting
 
-
-
 // Import all routes 
 
 import {userrouter} from './routes/user.routes.js'
 import {Vediorouter} from './routes/vedio.route.js'
-import { Playlistrouter } from './routes/playlist.route.js';
-
+import {Playlistrouter} from './routes/playlist.route.js';
+import {subscriptionRouter} from './routes/subscriptionRouter.route.js';
 
 app.use('/api/v1/users',userrouter)
 app.use('/api/v1/vedios',Vediorouter)
 app.use('/api/v1/playlist',Playlistrouter)
+app.use('/api/v1/subscription',subscriptionRouter)
 
 export default app;
 
@@ -43,5 +42,3 @@ export default app;
 // we define post fn
 // we define secondary route
 // we define main route
-
-

@@ -11,10 +11,6 @@ const subscriptionSchema = new Schema({
         ref: "User",
     } 
 
-    // {
-    //  channel:"CAC",
-    //  subscriber:"a",
-    //}
 
 }, { timestamps: true })
 
