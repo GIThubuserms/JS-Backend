@@ -1,6 +1,5 @@
 import mongoose, { model, Schema } from "mongoose";
 
-
 const TweetSchema=new Schema({
  
     owner:{
