@@ -4,6 +4,6 @@ import {ToggleSubscription,TotalSubscribers,SubscribedTo} from "../controllers/s
 
 export const subscriptionRouter=Router()
 
-subscriptionRouter.route('/Togglesubscribe').post(verifyuser,ToggleSubscription)
-subscriptionRouter.route('/TotalSubscriber').post(TotalSubscribers)
-subscriptionRouter.route('/SubscribedTo').post(SubscribedTo)
+subscriptionRouter.route('/Togglesubscribe/:ChannelName').post(verifyuser,ToggleSubscription)
+subscriptionRouter.route('/TotalSubscriber/:ChannelName').post(TotalSubscribers)
+subscriptionRouter.route('/SubscribedTo/:ChannelName').post(SubscribedTo)
