@@ -5,7 +5,7 @@ import ApiResponse from "../utils/Apiresponse.js";
 import { asyncHandler } from "../utils/Asynchandler.js";
 
 export const CreateTweet = asyncHandler(async (req, res) => {
-  const content = req.body;
+  const {content} = req.body;
   const userId = req.user._id;
   if (!content)
     throw new ApiError(400, "Please Provide the Content for the tweet");
@@ -27,7 +27,7 @@ export const CreateTweet = asyncHandler(async (req, res) => {
 
 export const UpdateTweet = asyncHandler(async (req, res) => {
   const { TweetId } = req.params;
-  const content = req.body;
+  const {content} = req.body;
   if (!content)
     throw new ApiError(400, "Please Provide the Content for the tweet");
   console.log("Content  : " + content);
@@ -35,7 +35,7 @@ export const UpdateTweet = asyncHandler(async (req, res) => {
 
   const UpdatedTweet = await Tweet.findByIdAndUpdate(TweetId, {
     content: content,
-  }).select("content");
+  },{new:true}).select("content");
   if (!UpdatedTweet) throw new ApiError(502, "Tweet Not Updated");
 
   console.log("Tweet After Updation : " + UpdatedTweet);
@@ -68,7 +68,8 @@ export const GetAllTweets = asyncHandler(async (req, res) => {
   ]);
 
   if (!UserTweets.length < 0)
-throw new ApiError(502, "Error while Fetching User Tweets");
+    
+  throw new ApiError(502, "Error while Fetching User Tweets");
   console.log("User Tweets : " + UserTweets.length);
-  res.status(200).json(new ApiResponse(200, UpdateTweets[0]),"Tweets Fetched Successfully");
+  return res.status(200).json(new ApiResponse(200,{UserTweets},"Tweets Fetched Successfully"))
 });
