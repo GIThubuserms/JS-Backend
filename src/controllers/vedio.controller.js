@@ -168,3 +168,14 @@ export const TogglePublishStatus=asyncHandler(async(req,res)=>{
     
     res.status(200).json( new ApiResponse(200,togglepublished,"Vedio Control Changed successfully"))    
 })
+
+export const IncrementVedioView=asyncHandler(asyncHandler(async(req,res)=>{
+  const {vedioId}=req.params
+  const IncrementVedioView=await Vedio.findByIdAndUpdate(vedioId,
+    {$inc:{'Views':1}},
+    {new:true}).select('Views')
+    if (!IncrementVedioView) throw new ApiError(404, "Vedio not found");
+    res.status(200).json(
+        new ApiResponse(200, IncrementVedioView, "Vedio views incremented successfully")
+    );
+}))

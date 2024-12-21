@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {UploadVedio,EditVedio,DeleteVedio,
-    GetVedioById,GetAllVedios,TogglePublishStatus} from '../controllers/vedio.controller.js'
+    GetVedioById,GetAllVedios,TogglePublishStatus,IncrementVedioView} from '../controllers/vedio.controller.js'
 import {verifyuser} from '../middlewares/Auth.middleware.js'
 import {upload} from '../middlewares/multer.middleware.js'
 
@@ -12,3 +12,4 @@ Vediorouter.route('/deletevedio/:vedioId').post(verifyuser,DeleteVedio)
 Vediorouter.route('/getvediobyid/:vedioId').post(GetVedioById)
 Vediorouter.route('/getallvedio/:userId').post(GetAllVedios)
 Vediorouter.route('/togglepublishstatus/:vedioId').post(verifyuser,TogglePublishStatus)
+Vediorouter.route('/view/:vedioId').post(IncrementVedioView)

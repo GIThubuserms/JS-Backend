@@ -23,6 +23,7 @@ import {subscriptionRouter} from './routes/subscription.route.js';
 import { Tweetrouter } from './routes/tweet.route.js';
 import { CommentRouter } from './routes/comment.route.js';
 import {Likerouter} from './routes/like.route.js'
+import { dashboardrouter } from './routes/dashboard.route.js';
 
 app.use('/api/v1/users',userrouter)
 app.use('/api/v1/vedios',Vediorouter)
@@ -31,6 +32,7 @@ app.use('/api/v1/subscription',subscriptionRouter)
 app.use('/api/v1/tweets',Tweetrouter)
 app.use('/api/v1/comments',CommentRouter)
 app.use('/api/v1/like',Likerouter)
+app.use('/api/v1/dashboard',dashboardrouter)
 
 
 export default app;
